@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>КОНСОЛЬНЫЙ ТЕРМИНАЛ v1.0</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="header-buttons">
+                    <span class="close-btn"></span>
+                    <span class="min-btn"></span>
+                    <span class="max-btn"></span>
+                </div>
+                <span class="header-title">ТЕРМИНАЛ v1.0</span>
+            </div>
+
+            <div class="terminal-content" id="output">
+                <div class="system-boot">
+                    <div>ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ...</div>
+                    <div class="boot-line">▊ ЗАГРУЗКА ЯДРА ▊▊▊▊▊▊▊▊▊▊ 100%</div>
+                    <div class="boot-line">▊ ПОДКЛЮЧЕНИЕ ИНТЕРФЕЙСА ▊▊▊▊▊ 100%</div>
+                    <div class="boot-line">▊ АКТИВАЦИЯ МОДУЛЯ ▊▊▊▊▊▊▊▊▊ 100%</div>
+                    <div class="success">✓ СИСТЕМА ГОТОВА</div>
+                </div>
+
+                <div class="game-intro">
+                    <div class="title">=== КОНСОЛЬНЫЙ ТЕРМИНАЛ ===</div>
+                    <div>Добро пожаловать в систему. Для начала работы введите команду:</div>
+                    <div class="command-list">
+                        <span class="command">start</span> - начать игру<br>
+                        <span class="command">help</span> - список команд<br>
+                        <span class="command">about</span> - информация о системе
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-line">
+                <span class="prompt" id="prompt">user@terminal:~$ </span>
+                <textarea class="command-input" id="commandInput" rows="1" autofocus></textarea>
+            </div>
+        </div>
+
+        <div class="virtual-controls" id="virtualControls">
+            <div class="control-row">
+                <button class="control-btn" data-action="up">↑</button>
+            </div>
+            <div class="control-row">
+                <button class="control-btn" data-action="left">←</button>
+                <button class="control-btn" data-action="action">A</button>
+                <button class="control-btn" data-action="right">→</button>
+            </div>
+            <div class="control-row">
+                <button class="control-btn" data-action="down">↓</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

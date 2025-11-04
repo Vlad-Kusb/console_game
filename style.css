@@ -1,0 +1,328 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #000;
+    font-family: 'Courier New', 'Consolas', monospace;
+    color: #00ff00;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+}
+
+/* Терминал */
+.terminal {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Шапка терминала */
+.terminal-header {
+    background: #2d2d2d;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.header-buttons span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.close-btn { background: #ff5f57; }
+.min-btn { background: #ffbd2e; }
+.max-btn { background: #28ca42; }
+
+.header-title {
+    font-size: 14px;
+    color: #ccc;
+    font-weight: bold;
+}
+
+/* Контент терминала */
+.terminal-content {
+    height: 500px;
+    padding: 20px;
+    overflow-y: auto;
+    line-height: 1.4;
+    font-size: 16px;
+}
+
+/* Полоса прокрутки */
+.terminal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-content::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.terminal-content::-webkit-scrollbar-thumb {
+    background: #00ff00;
+    border-radius: 4px;
+}
+
+/* Системные сообщения */
+.system-boot {
+    margin-bottom: 20px;
+}
+
+.boot-line {
+    margin: 5px 0;
+    color: #66ff66;
+}
+
+.success {
+    color: #00ff00;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.game-intro {
+    margin-top: 20px;
+}
+
+.title {
+    color: #00ff00;
+    font-weight: bold;
+    font-size: 18px;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.command-list {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.command {
+    color: #ffff00;
+    font-weight: bold;
+}
+
+/* Строка ввода */
+.input-line {
+    padding: 15px 20px;
+    background: #151515;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+}
+
+.prompt {
+    color: #00ffff;
+    font-weight: bold;
+    margin-right: 10px;
+    white-space: nowrap;
+    line-height: 1.4;
+    padding-top: 2px;
+}
+
+.command-input {
+    background: transparent;
+    border: none;
+    color: #00ff00;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    flex-grow: 1;
+    resize: none;
+    overflow: hidden;
+    min-height: 20px;
+    line-height: 1.4;
+    caret-color: #00ff00;
+    padding: 0;
+    margin: 0;
+}
+
+/* Виртуальные кнопки */
+.virtual-controls {
+    display: none;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.control-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.control-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 255, 0, 0.1);
+    border: 2px solid #00ff00;
+    border-radius: 50%;
+    color: #00ff00;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: all 0.2s;
+}
+
+.control-btn:active {
+    background: rgba(0, 255, 0, 0.3);
+    transform: scale(0.95);
+}
+
+/* Игровые элементы */
+.game-output {
+    margin: 10px 0;
+}
+
+.location {
+    color: #ffff00;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.inventory {
+    border-top: 1px dashed #333;
+    margin-top: 15px;
+    padding-top: 10px;
+}
+
+/* Сообщения */
+.system-message {
+    color: #66ccff;
+    font-style: italic;
+}
+
+.error-message {
+    color: #ff6666;
+}
+
+.success-message {
+    color: #66ff66;
+}
+
+/* Стили для системы пользователей */
+.user-system {
+    border-left: 3px solid #00ffff;
+    padding-left: 10px;
+    margin: 10px 0;
+}
+
+.user-list {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.user-online {
+    color: #00ff00;
+}
+
+.user-offline {
+    color: #ff6666;
+}
+
+.current-user {
+    color: #ffff00;
+    font-weight: bold;
+}
+
+.admin-badge {
+    color: #ff00ff;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+/* Анимации для посимвольного вывода */
+.typing-animation {
+    overflow: hidden;
+    border-right: 2px solid #00ff00;
+    white-space: nowrap;
+    animation: typing-cursor 0.8s infinite;
+}
+
+@keyframes typing-cursor {
+    0%, 50% { border-color: #00ff00; }
+    51%, 100% { border-color: transparent; }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        align-items: flex-start;
+    }
+
+    .terminal-content {
+        height: 400px;
+        font-size: 14px;
+        padding: 15px;
+    }
+
+    .virtual-controls {
+        display: grid;
+    }
+
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+    }
+
+    .input-line {
+        padding: 10px 15px;
+    }
+
+    .prompt {
+        font-size: 14px;
+    }
+
+    .command-input {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .terminal-content {
+        height: 350px;
+        font-size: 13px;
+    }
+
+    .input-line {
+        padding: 8px 12px;
+    }
+
+    .prompt {
+        font-size: 12px;
+        margin-right: 5px;
+    }
+
+    .command-input {
+        font-size: 13px;
+    }
+}
