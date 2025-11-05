@@ -4,6 +4,8 @@ class ConsoleGame {
         this.commandInput = document.getElementById('commandInput');
         this.promptElement = document.getElementById('prompt');
         this.virtualControls = document.getElementById('virtualControls');
+        this.headerVersion = document.getElementById('header-version');
+        this.gameVersion = "v0.0.3";
 
         this.gameState = {
             started: false,
@@ -51,6 +53,9 @@ class ConsoleGame {
     init() {
         // Фокус на поле ввода
         this.commandInput.focus();
+
+        this.headerVersion.textContent = this.gameVersion;
+        document.title = `Console ${this.gameVersion}`
 
         // Обработчик ввода команд
         this.commandInput.addEventListener('keydown', (e) => {
@@ -381,18 +386,26 @@ ${userCommands}
 
     showAbout() {
         const aboutText = `
-<span class="title">=== КОНСОЛЬНЫЙ ТЕРМИНАЛ v2.0 ===</span>
-
+<span class="title">=== КОНСОЛЬНЫЙ ТЕРМИНАЛ ${this.gameVersion} ===</span>
+<br>
 <span class="system-message">Добавлена система пользователей:</span>
+<br>
 - Регистрация и вход без паролей
+<br>
 - Отслеживание онлайн-пользователей
+<br>
 - Информация о зарегистрированных пользователях
+<br>
 - Динамическое изменение приглашения
-
+<br>
 <span class="system-message">Команды пользователей:</span>
+<br>
 • register, login, logout, whoami, showusers
+<br>
+<span class="system-message">Идея: текстовая приключенческая игра в виде консоли.</span>
+<br>
+<span class="system-message">Автор идеи, создатель: Влад Кусь (vk.com/id284185443).</span>
 
-<span class="system-message">Идея: текстовая приключенческая игра с системой пользователей.</span>
         `;
         this.print(aboutText, 'system');
     }
