@@ -402,9 +402,15 @@ ${userCommands}
 <br>
 • register, login, logout, whoami, showusers
 <br>
-<span class="system-message">Идея: текстовая приключенческая игра в виде консоли.</span>
+<span class="system-message">Идея: текстовая приключенческая игра в виде консоли.
 <br>
-<span class="system-message">Автор идеи, создатель: Влад Кусь (vk.com/id284185443).</span>
+Автор идеи, создатель: Влад Кусь (vk.com/id284185443).
+<br>
+<br>
+P.S.
+<br>
+Ещё совсем ничего не готово :)
+</span>
 
         `;
         this.print(aboutText, 'system');
