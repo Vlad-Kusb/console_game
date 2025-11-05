@@ -422,3 +422,55 @@ body {
         font-size: 12px;
     }
 }
+
+/* Стили для временных сообщений */
+.temporary-message {
+    color: #ffaa00;
+    font-style: italic;
+    background: rgba(255, 170, 0, 0.1);
+    border-left: 3px solid #ffaa00;
+    padding-left: 10px;
+    margin: 5px 0;
+    transition: all 0.3s ease-out;
+    max-height: 100px; /* Добавляем начальную максимальную высоту */
+    overflow: hidden; /* Скрываем переполнение */
+}
+
+.temporary-message.fade-out {
+    opacity: 0;
+    transform: translateX(-10px);
+    max-height: 0; /* Уменьшаем высоту до 0 */
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border-width: 0; /* Убираем границу */
+}
+
+/* Стили для временных элементов внутри сообщений */
+.temp, .temporary, [data-temp] {
+    color: #ff6666;
+    font-style: italic;
+    background: rgba(255, 102, 102, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.3s ease-out;
+    display: inline-block;
+    max-height: 20px; /* Добавляем начальную максимальную высоту */
+    overflow: hidden; /* Скрываем переполнение */
+    vertical-align: top; /* Выравнивание по верху чтобы не смещало строку */
+}
+
+.temp.fade-out, .temporary.fade-out, [data-temp].fade-out {
+    opacity: 0;
+    transform: scale(0.8) translateY(-2px);
+    max-width: 0;
+    max-height: 0; /* Добавляем анимацию высоты */
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+/* Плавное исчезновение для любых элементов с анимацией */
+.fade-out {
+    transition: all 0.3s ease-out !important;
+}

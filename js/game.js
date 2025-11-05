@@ -9,7 +9,7 @@ class ConsoleGame {
         this.terminal = document.getElementById('terminal');
         this.terminalHeader = document.getElementById('terminalHeader');
 
-        this.gameVersion = "v0.0.6";
+        this.gameVersion = "v0.0.64";
 
         // Переменные для перетаскивания
         this.isDragging = false;
@@ -56,7 +56,8 @@ class ConsoleGame {
             'whoami': this.whoami.bind(this),
             'history': this.showHistory.bind(this),
             'clearhistory': this.clearHistory.bind(this),
-            'exit': this.exit.bind(this)
+            'exit': this.exit.bind(this),
+            'demo_temp': this.demoTemp.bind(this)
         };
 
         this.init();
@@ -156,6 +157,7 @@ class ConsoleGame {
         this.updatePrompt();
         this.print('Введите <span class="command">help</span> для списка команд.', 'system');
         this.print('Для начала работы введите <span class="command">register имя_пользователя</span>', 'system');
+        this.print('ПОМОГИТЕ ПОЖАЛУЙСТА ВЫБРАТЬСЯ ОТСЮДА', 'temp')
     }
 
     // Фиксируем ширину терминала
@@ -715,6 +717,9 @@ ${userInfo}
             const line = this.createLine(message, type);
             this.output.appendChild(line);
             this.output.scrollTop = this.output.scrollHeight;
+
+            // Обработка временных сообщений (без анимации)
+            this.handleTemporaryContent(line, type);
             return;
         }
 
@@ -749,11 +754,63 @@ ${userInfo}
             // Прокрутка вниз
             this.output.scrollTop = this.output.scrollHeight;
 
+            // Обработка временных сообщений после анимации
+            this.handleTemporaryContent(line, type);
+
             // Обрабатываем следующее сообщение в очереди
             setTimeout(() => {
                 this.processTypingQueue();
             }, 50);
         });
+    }
+
+    // Обработка временного контента с паузой 0.5 секунды
+    handleTemporaryContent(line, type) {
+        // Если весь message временный
+        if (type === 'temp' || type === 'temporary') {
+            setTimeout(() => {
+                // Добавляем анимацию исчезновения
+                line.classList.add('fade-out');
+                setTimeout(() => {
+                    if (line.parentNode) {
+                        line.remove();
+                    }
+                }, 300); // Время анимации исчезновения
+            }, 500); // Пауза 0.5 секунды перед началом удаления
+            return;
+        }
+
+        // Поиск временных частей сообщения
+        const tempElements = line.querySelectorAll('.temp, .temporary, [data-temp]');
+        if (tempElements.length > 0) {
+            setTimeout(() => {
+                // Добавляем анимацию исчезновения для каждого элемента
+                tempElements.forEach(element => {
+                    element.classList.add('fade-out');
+                });
+
+                // Удаляем элементы после анимации
+                setTimeout(() => {
+                    tempElements.forEach(element => {
+                        if (element.parentNode) {
+                            element.remove();
+                        }
+                    });
+
+                    // Если после удаления временных элементов строка пустая, удаляем всю строку
+                    if (line.textContent.trim() === '' && line.children.length === 0) {
+                        if (line.parentNode) {
+                            line.classList.add('fade-out');
+                            setTimeout(() => {
+                                if (line.parentNode) {
+                                    line.remove();
+                                }
+                            }, 300);
+                        }
+                    }
+                }, 300); // Время анимации исчезновения
+            }, 500); // Пауза 0.5 секунды перед началом удаления
+        }
     }
 
     createLine(message, type) {
@@ -771,6 +828,10 @@ ${userInfo}
                 break;
             case 'game':
                 line.className = 'game-output';
+                break;
+            case 'temp':
+            case 'temporary':
+                line.className = 'temporary-message';
                 break;
             default:
                 line.className = 'output-line';
@@ -969,6 +1030,33 @@ ${userInfo}
         this.gameState.inventory.push(item);
         this.print(`Получен предмет: <span class="command">${item}</span>`, 'success');
     }
+
+    demoTemp() {
+        this.print('=== ДЕМОНСТРАЦИЯ ВРЕМЕННЫХ СООБЩЕНИЙ ===', 'system');
+
+        // Временное сообщение целиком
+        this.print('Это сообщение исчезнет полностью через мгновение...', 'temp');
+
+        // Сообщение с временной частью
+        this.print('Постоянный текст <span class="temp">а эта часть исчезнет</span> и останется только этот текст.', 'system');
+
+        // Несколько временных частей
+        this.print('Начало <span class="temporary">[временная часть 1]</span> середина <span class="temp">[временная часть 2]</span> конец.', 'system');
+
+        // Сообщение с разными типами временных элементов
+        this.print('Разные стили: <span class="temp" style="color: #ff6666">красный временный</span> и <span class="temporary" style="color: #66ccff">синий временный</span> текст.', 'system');
+
+        // Сообщение, которое почти полностью временное
+        this.print('<span class="temp">Это почти все сообщение временное</span> <span style="color: #00ff00">но этот зеленый текст останется</span>', 'system');
+
+        this.print('Демонстрация завершена. Временные части должны были исчезнуть!', 'success');
+    }
+
+    // Добавляем команду demo_temp в список команд
+    // В конструкторе добавляем:
+    // 'demo_temp': this.demoTemp.bind(this)
+
+    // ... остальной код без изменений ...
 }
 
 // Инициализация игры
