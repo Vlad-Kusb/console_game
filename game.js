@@ -366,6 +366,7 @@ class ConsoleGame {
 <span class="system-message">СИСТЕМНЫЕ КОМАНДЫ:</span>
 <br>
 ${userCommands}
+<br>
 <span class="command">start</span>      - Начать игру (требуется вход)
 <br>
 <span class="command">status</span>     - Показать состояние
