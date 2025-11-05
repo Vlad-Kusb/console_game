@@ -4,7 +4,9 @@ class ConsoleGame {
         this.commandInput = document.getElementById('commandInput');
         this.promptElement = document.getElementById('prompt');
         this.virtualControls = document.getElementById('virtualControls');
-        this.headerVersion = document.getElementById('header-version');
+        this.headerVersion = document.getElementById('headerVersion');
+        this.interface = document.getElementById('interface');
+
         this.gameVersion = "v0.0.3";
 
         this.gameState = {
@@ -46,7 +48,8 @@ class ConsoleGame {
             'showusers': this.showUsers.bind(this),
             'whoami': this.whoami.bind(this),
             'history': this.showHistory.bind(this),
-            'clearhistory': this.clearHistory.bind(this)
+            'clearhistory': this.clearHistory.bind(this),
+            'exit': this.exit.bind(this)
         };
 
         this.init();
@@ -314,12 +317,12 @@ class ConsoleGame {
 
             const regDate = new Date(user.registeredAt).toLocaleDateString();
 
-            output += `• <strong>${user.username}</strong> ${adminBadge} ${status} ${currentIndicator}<br>`;
-            output += `&nbsp;&nbsp;Зарегистрирован: ${regDate}<br>`;
+            output += `• <strong>${user.username}</strong> ${adminBadge} ${status} ${currentIndicator} `;
+            output += `Зарегистрирован: ${regDate}<br>`;
         });
 
         output += `</div>`;
-        output += `<div class="system-message">Всего пользователей: ${users.length} | Онлайн: ${this.gameState.onlineUsers.length}</div>`;
+        output += `<div class="system-message"><br>Всего пользователей: ${users.length} | Онлайн: ${this.gameState.onlineUsers.length}</div>`;
 
         this.print(output, 'system');
     }
@@ -528,6 +531,12 @@ ${userInfo}
     clearScreen() {
         this.output.innerHTML = '';
         this.print('Экран очищен.', 'system');
+    }
+
+    exit() {
+
+        this.print('Bye bye',"succsess", false);
+        this.interface.innerHTML = 'Bye bye';
     }
 
     move(args) {
