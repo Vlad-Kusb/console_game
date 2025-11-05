@@ -280,6 +280,34 @@ body {
     margin-left: 2px;
 }
 
+/* Стили для системы истории */
+.history-system {
+    border-left: 3px solid #ffaa00;
+    padding-left: 10px;
+    margin: 10px 0;
+}
+
+.history-number {
+    color: #ffaa00;
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 30px;
+    display: inline-block;
+}
+
+.current-history {
+    color: #00ff00;
+    font-style: italic;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.history-stats {
+    color: #66ccff;
+    font-size: 14px;
+    margin: 5px 0;
+}
+
 
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {

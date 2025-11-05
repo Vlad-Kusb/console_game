@@ -44,7 +44,9 @@ class ConsoleGame {
             'login': this.loginUser.bind(this),
             'logout': this.logoutUser.bind(this),
             'showusers': this.showUsers.bind(this),
-            'whoami': this.whoami.bind(this)
+            'whoami': this.whoami.bind(this),
+            'history': this.showHistory.bind(this),
+            'clearhistory': this.clearHistory.bind(this)
         };
 
         this.init();
@@ -133,13 +135,21 @@ class ConsoleGame {
     navigateHistory(direction) {
         if (this.commandHistory.length === 0) return;
 
+        // Сохраняем старый индекс для отладки
+        const oldIndex = this.historyIndex;
+
         this.historyIndex += direction;
 
-        if (this.historyIndex < 0) {
+        // Ограничиваем индекс в пределах истории + пустая строка
+        if (this.historyIndex < -1) {
             this.historyIndex = -1;
-            this.commandInput.value = '';
-        } else if (this.historyIndex >= this.commandHistory.length) {
+        } else if (this.historyIndex > this.commandHistory.length - 1) {
             this.historyIndex = this.commandHistory.length - 1;
+        }
+
+        // Устанавливаем значение в input
+        if (this.historyIndex === -1) {
+            this.commandInput.value = '';
         } else {
             this.commandInput.value = this.commandHistory[this.historyIndex];
         }
@@ -150,9 +160,13 @@ class ConsoleGame {
     processCommand(input) {
         if (!input) return;
 
-        // Добавляем команду в историю
-        this.commandHistory.push(input);
-        this.historyIndex = this.commandHistory.length;
+        // Добавляем команду в историю (если она не повторяет предыдущую)
+        if (this.commandHistory[this.commandHistory.length - 1] !== input) {
+            this.commandHistory.push(input);
+        }
+
+        // Сбрасываем индекс истории на "пустую строку"
+        this.historyIndex = -1;
 
         // Добавляем команду в историю вывода с правильным промптом
         const username = this.gameState.currentUser ? this.gameState.currentUser : 'user';
@@ -379,6 +393,12 @@ ${userCommands}
 <br>
 <span class="command">clear</span>      - Очистить экран
 <br>
+
+<span class="command">history</span>      - Показать историю команд
+<br>
+<span class="command">clearhistory</span>      - Очистить Историю
+<br>
+
 <span class="command">about</span>      - Информация о системе
 <br>
 <span class="command">help</span>       - Эта справка
@@ -428,6 +448,43 @@ P.S.
 
         `;
         this.print(aboutText, 'system');
+    }
+
+    // Новые методы для работы с историей
+
+    showHistory() {
+        if (this.commandHistory.length === 0) {
+            this.print('История команд пуста.', 'system');
+            return;
+        }
+
+        let output = '<div class="history-system">';
+        output += '<span class="title">=== ИСТОРИЯ КОМАНД ===</span><br>';
+
+        this.commandHistory.forEach((command, index) => {
+            const currentIndicator = index === this.historyIndex ?
+                '<span class="current-history"> ← текущая</span>' : '';
+
+            output += `<span class="history-number">${index + 1}.</span> ${command}${currentIndicator}<br>`;
+        });
+
+        output += `</div>`;
+        output += `<div class="system-message">Всего команд: ${this.commandHistory.length}</div>`;
+        output += `<div class="system-message">Используйте стрелки вверх/вниз для навигации по истории</div>`;
+
+        this.print(output, 'system');
+    }
+
+    clearHistory() {
+        const historyCount = this.commandHistory.length;
+        this.commandHistory = [];
+        this.historyIndex = -1;
+
+        if (historyCount > 0) {
+            this.print(`История команд очищена. Удалено ${historyCount} команд.`, 'success');
+        } else {
+            this.print('История команд уже пуста.', 'system');
+        }
     }
 
     showStatus() {
