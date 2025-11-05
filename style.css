@@ -259,17 +259,27 @@ body {
 }
 
 /* Анимации для посимвольного вывода */
+/* Улучшенные стили для анимированного текста */
 .typing-animation {
     overflow: hidden;
-    border-right: 2px solid #00ff00;
     white-space: nowrap;
+    border-right: 2px solid #00ff00;
     animation: typing-cursor 0.8s infinite;
 }
 
-@keyframes typing-cursor {
-    0%, 50% { border-color: #00ff00; }
-    51%, 100% { border-color: transparent; }
+/* Для многострочного контента убираем nowrap */
+.typing-animation.multiline {
+    white-space: normal;
+    border-right: none;
 }
+
+.typing-animation.multiline::after {
+    content: '▊';
+    color: #00ff00;
+    animation: blink 0.8s infinite;
+    margin-left: 2px;
+}
+
 
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {

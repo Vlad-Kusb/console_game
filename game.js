@@ -362,22 +362,35 @@ class ConsoleGame {
 
         const helpText = `
 <span class="title">=== ДОСТУПНЫЕ КОМАНДЫ ===</span>
-
-<span class="command">СИСТЕМНЫЕ КОМАНДЫ:</span>
+<br>
+<span class="system-message">СИСТЕМНЫЕ КОМАНДЫ:</span>
+<br>
 ${userCommands}
 <span class="command">start</span>      - Начать игру (требуется вход)
+<br>
 <span class="command">status</span>     - Показать состояние
+<br>
 <span class="command">inventory</span>  - Показать инвентарь
+<br>
 <span class="command">move [направление]</span> - Перемещение
+<br>
 <span class="command">look</span>       - Осмотреться вокруг
+<br>
 <span class="command">clear</span>      - Очистить экран
+<br>
 <span class="command">about</span>      - Информация о системе
+<br>
 <span class="command">help</span>       - Эта справка
+<br><br>
 
 <span class="system-message">Управление:</span>
+<br>
 - Стрелки вверх/вниз: история команд
-- Пробел: обычный ввод (Ctrl+Пробел для осмотра)
+<br>
+- Пробел: обычный ввод (Ctrl+Пробел(Shift+Пробел) для осмотра)
+<br>
 - Виртуальные кнопки на мобильных
+<br>
 
 <span class="system-message">Текущий пользователь: ${this.gameState.currentUser ? this.gameState.currentUser : 'не авторизован'}</span>
         `;
@@ -585,46 +598,193 @@ ${userInfo}
                 line.className = 'output-line';
         }
 
-        line.innerHTML = message;
+        // Не устанавливаем innerHTML здесь - это сделает анимация
+        line.textContent = ''; // Начинаем с пустого содержимого
         return line;
     }
 
-    typeText(element, text, callback) {
-        let index = 0;
-        const speed = 10; // ms между символами - достаточно быстро
+    typeText(element, html, callback) {
+        // Парсим HTML на токены: текст и теги
+        const tokens = this.parseHTML(html);
+        let tokenIndex = 0;
+        let currentElement = element;
+        const speed = 5; // 5ms между символами
+        let lastScrollTime = 0;
+        const scrollInterval = 100; // Прокручиваем каждые 100ms
 
-        function type() {
-            if (index < text.length) {
-                // Берем следующий символ и добавляем к текущему содержимому
-                const currentText = element.innerHTML;
-                const nextChar = text[index];
+        const processTokens = () => {
+            if (tokenIndex >= tokens.length) {
+                callback();
+                return;
+            }
 
-                // Проверяем, не является ли символ началом HTML-тега
-                if (nextChar === '<') {
-                    // Ищем конец тега
-                    const tagEnd = text.indexOf('>', index);
-                    if (tagEnd !== -1) {
-                        // Добавляем весь тег сразу
-                        const fullTag = text.substring(index, tagEnd + 1);
-                        element.innerHTML = currentText + fullTag;
-                        index = tagEnd + 1;
-                    } else {
-                        // Если что-то пошло не так, добавляем посимвольно
-                        element.innerHTML = currentText + nextChar;
-                        index++;
+            const token = tokens[tokenIndex];
+
+            if (token.type === 'tag') {
+                // Обработка HTML-тега
+                if (token.tag === 'br') {
+                    // Перенос строки
+                    currentElement = element; // Возвращаемся к основному элементу
+                    const br = document.createElement('br');
+                    element.appendChild(br);
+                } else if (token.isStartTag) {
+                    // Открывающий тег - создаем элемент
+                    const newElement = document.createElement(token.tag);
+
+                    // Добавляем атрибуты
+                    if (token.attributes) {
+                        for (const [key, value] of Object.entries(token.attributes)) {
+                            newElement.setAttribute(key, value);
+                        }
                     }
+
+                    // Добавляем классы
+                    if (token.className) {
+                        newElement.className = token.className;
+                    }
+
+                    element.appendChild(newElement);
+                    currentElement = newElement;
                 } else {
-                    element.innerHTML = currentText + nextChar;
-                    index++;
+                    // Закрывающий тег - возвращаемся к родителю
+                    currentElement = element;
                 }
 
-                setTimeout(type, speed);
+                // Прокрутка после тега
+                this.autoScroll();
+
+                tokenIndex++;
+                setTimeout(processTokens, speed);
             } else {
-                callback();
+                // Обычный текст - выводим посимвольно
+                const text = token.content;
+                let charIndex = 0;
+
+                const typeChars = () => {
+                    if (charIndex < text.length) {
+                        // Добавляем символ к текущему элементу
+                        if (currentElement === element) {
+                            // Если текущий элемент - основной, добавляем текстовый узел
+                            const textNode = document.createTextNode(text[charIndex]);
+                            element.appendChild(textNode);
+                        } else {
+                            // Если внутри span, добавляем к его содержимому
+                            currentElement.textContent += text[charIndex];
+                        }
+
+                        // Прокручиваем с определенным интервалом, чтобы не нагружать производительность
+                        const now = Date.now();
+                        if (now - lastScrollTime > scrollInterval) {
+                            this.autoScroll();
+                            lastScrollTime = now;
+                        }
+
+                        charIndex++;
+                        setTimeout(typeChars, speed);
+                    } else {
+                        // Финальная прокрутка после завершения токена
+                        this.autoScroll();
+                        tokenIndex++;
+                        setTimeout(processTokens, speed);
+                    }
+                };
+
+                typeChars();
+            }
+        };
+
+        processTokens();
+    }
+
+    // Метод для автоматической прокрутки к низу
+    autoScroll() {
+        // Небольшая задержка чтобы дать браузеру обновить DOM
+        setTimeout(() => {
+            this.output.scrollTop = this.output.scrollHeight;
+        }, 0);
+    }
+
+    parseHTML(html) {
+        const tokens = [];
+        let i = 0;
+
+        while (i < html.length) {
+            if (html[i] === '<') {
+                // Нашли тег
+                const endIndex = html.indexOf('>', i);
+                if (endIndex === -1) break;
+
+                const tagContent = html.substring(i + 1, endIndex);
+
+                if (tagContent.startsWith('/')) {
+                    // Закрывающий тег
+                    tokens.push({
+                        type: 'tag',
+                        tag: tagContent.substring(1).split(' ')[0],
+                        isStartTag: false
+                    });
+                } else if (tagContent.endsWith('/')) {
+                    // Одиночный тег (например, <br/>)
+                    tokens.push({
+                        type: 'tag',
+                        tag: tagContent.substring(0, tagContent.length - 1).split(' ')[0],
+                        isStartTag: true,
+                        isSelfClosing: true
+                    });
+                } else {
+                    // Открывающий тег
+                    const tagParts = tagContent.split(' ');
+                    const tagName = tagParts[0];
+                    const attributes = {};
+                    let className = '';
+
+                    // Парсим атрибуты
+                    for (let j = 1; j < tagParts.length; j++) {
+                        const part = tagParts[j];
+                        if (part.includes('=')) {
+                            const [key, value] = part.split('=');
+                            let cleanValue = value;
+                            if (value.startsWith('"') && value.endsWith('"')) {
+                                cleanValue = value.substring(1, value.length - 1);
+                            } else if (value.startsWith("'") && value.endsWith("'")) {
+                                cleanValue = value.substring(1, value.length - 1);
+                            }
+                            attributes[key] = cleanValue;
+
+                            if (key === 'class') {
+                                className = cleanValue;
+                            }
+                        }
+                    }
+
+                    tokens.push({
+                        type: 'tag',
+                        tag: tagName,
+                        isStartTag: true,
+                        attributes: Object.keys(attributes).length > 0 ? attributes : null,
+                        className: className || null
+                    });
+                }
+
+                i = endIndex + 1;
+            } else {
+                // Нашли текст
+                const nextTag = html.indexOf('<', i);
+                const textEnd = nextTag === -1 ? html.length : nextTag;
+                const textContent = html.substring(i, textEnd);
+
+                if (textContent.trim() !== '') {
+                    tokens.push({
+                        type: 'text',
+                        content: textContent
+                    });
+                }
+
+                i = textEnd;
             }
         }
 
-        type();
+        return tokens;
     }
 
     addToInventory(item) {
