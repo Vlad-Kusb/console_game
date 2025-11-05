@@ -9,7 +9,7 @@ class ConsoleGame {
         this.terminal = document.getElementById('terminal');
         this.terminalHeader = document.getElementById('terminalHeader');
 
-        this.gameVersion = "v0.0.5";
+        this.gameVersion = "v0.0.6";
 
         // Переменные для перетаскивания
         this.isDragging = false;
@@ -115,9 +115,17 @@ class ConsoleGame {
             }
         });
 
-        // Автоматическое изменение размера textarea
+        // Автоматическое изменение размера textarea (только высота)
         this.commandInput.addEventListener('input', () => {
             this.autoResize();
+        });
+
+        // Предотвращаем изменение ширины при вводе текста
+        this.commandInput.addEventListener('keydown', (e) => {
+            if (e.key.length === 1) { // Любой символьный ключ
+                // Сохраняем текущую ширину терминала
+                this.terminal.style.width = this.terminal.offsetWidth + 'px';
+            }
         });
 
         // Обработчик виртуальных кнопок
@@ -142,9 +150,19 @@ class ConsoleGame {
         // Инициализация размера textarea
         this.autoResize();
 
+        // Фиксируем начальную ширину терминала
+        this.fixTerminalWidth();
+
         this.updatePrompt();
         this.print('Введите <span class="command">help</span> для списка команд.', 'system');
         this.print('Для начала работы введите <span class="command">register имя_пользователя</span>', 'system');
+    }
+
+    // Фиксируем ширину терминала
+    fixTerminalWidth() {
+        const currentWidth = this.terminal.offsetWidth;
+        this.terminal.style.minWidth = currentWidth + 'px';
+        this.terminal.style.maxWidth = currentWidth + 'px';
     }
 
     // Инициализация системы перетаскивания
@@ -212,8 +230,15 @@ class ConsoleGame {
     }
 
     autoResize() {
+        // Сохраняем текущую ширину
+        const currentWidth = this.terminal.offsetWidth;
+
+        // Меняем только высоту
         this.commandInput.style.height = 'auto';
         this.commandInput.style.height = this.commandInput.scrollHeight + 'px';
+
+        // Фиксируем ширину обратно
+        this.terminal.style.width = currentWidth + 'px';
     }
 
     navigateHistory(direction) {
