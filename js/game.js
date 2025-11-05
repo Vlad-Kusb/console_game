@@ -6,8 +6,15 @@ class ConsoleGame {
         this.virtualControls = document.getElementById('virtualControls');
         this.headerVersion = document.getElementById('headerVersion');
         this.interface = document.getElementById('interface');
+        this.terminal = document.getElementById('terminal');
+        this.terminalHeader = document.getElementById('terminalHeader');
 
-        this.gameVersion = "v0.0.3";
+        this.gameVersion = "v0.0.5";
+
+        // Переменные для перетаскивания
+        this.isDragging = false;
+        this.dragOffset = { x: 0, y: 0 };
+        this.isMobile = this.checkMobile();
 
         this.gameState = {
             started: false,
@@ -55,16 +62,31 @@ class ConsoleGame {
         this.init();
     }
 
+    // Проверка на мобильное устройство
+    checkMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    }
+
     init() {
         // Фокус на поле ввода
         this.commandInput.focus();
 
         this.headerVersion.textContent = this.gameVersion;
-        document.title = `Console ${this.gameVersion}`
+        document.title = `Console ${this.gameVersion}`;
+
+        // Инициализация перетаскивания только для ПК
+        if (!this.isMobile) {
+            this.initDragging();
+        }
+
+        // Обработчик кнопки закрытия
+        document.querySelector('.close-btn').addEventListener('click', () => {
+            this.exit();
+        });
 
         // Обработчик ввода команд
         this.commandInput.addEventListener('keydown', (e) => {
-            switch(e.key) {
+            switch (e.key) {
                 case 'Enter':
                     if (!e.shiftKey) {
                         e.preventDefault();
@@ -125,6 +147,65 @@ class ConsoleGame {
         this.print('Для начала работы введите <span class="command">register имя_пользователя</span>', 'system');
     }
 
+    // Инициализация системы перетаскивания
+    initDragging() {
+        this.terminalHeader.addEventListener('mousedown', (e) => {
+            // Не начинаем перетаскивание при клике на кнопки
+            if (e.target.classList.contains('close-btn') ||
+                e.target.classList.contains('min-btn') ||
+                e.target.classList.contains('max-btn')) {
+                return;
+            }
+            this.startDragging(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            this.onDrag(e);
+        });
+
+        document.addEventListener('mouseup', () => {
+            this.stopDragging();
+        });
+    }
+
+    startDragging(e) {
+        this.isDragging = true;
+        const rect = this.terminal.getBoundingClientRect();
+        this.dragOffset.x = e.clientX - rect.left;
+        this.dragOffset.y = e.clientY - rect.top;
+
+        this.terminal.classList.add('dragging');
+        this.terminal.style.cursor = 'grabbing';
+
+        // Предотвращаем выделение текста при перетаскивании
+        document.body.style.userSelect = 'none';
+    }
+
+    onDrag(e) {
+        if (!this.isDragging) return;
+
+        const x = e.clientX - this.dragOffset.x;
+        const y = e.clientY - this.dragOffset.y;
+
+        // Ограничиваем перемещение в пределах окна
+        const maxX = window.innerWidth - this.terminal.offsetWidth;
+        const maxY = window.innerHeight - this.terminal.offsetHeight;
+
+        const boundedX = Math.max(10, Math.min(x, maxX - 10));
+        const boundedY = Math.max(10, Math.min(y, maxY - 10));
+
+        this.terminal.style.left = boundedX + 'px';
+        this.terminal.style.top = boundedY + 'px';
+        this.terminal.style.transform = 'none';
+    }
+
+    stopDragging() {
+        this.isDragging = false;
+        this.terminal.classList.remove('dragging');
+        this.terminal.style.cursor = '';
+        document.body.style.userSelect = '';
+    }
+
     updatePrompt() {
         const username = this.gameState.currentUser ? this.gameState.currentUser : 'user';
         this.promptElement.textContent = `${username}@terminal:~$ `;
@@ -138,19 +219,22 @@ class ConsoleGame {
     navigateHistory(direction) {
         if (this.commandHistory.length === 0) return;
 
-        // Сохраняем старый индекс для отладки
-        const oldIndex = this.historyIndex;
-
-        this.historyIndex += direction;
-
-        // Ограничиваем индекс в пределах истории + пустая строка
-        if (this.historyIndex < -1) {
-            this.historyIndex = -1;
-        } else if (this.historyIndex > this.commandHistory.length - 1) {
-            this.historyIndex = this.commandHistory.length - 1;
+        if (direction === -1) { // Стрелка ВВЕРХ
+            if (this.historyIndex === -1) {
+                this.historyIndex = this.commandHistory.length - 1;
+            } else if (this.historyIndex > 0) {
+                this.historyIndex--;
+            }
+        } else if (direction === 1) { // Стрелка ВНИЗ
+            if (this.historyIndex === -1) {
+                return;
+            } else if (this.historyIndex < this.commandHistory.length - 1) {
+                this.historyIndex++;
+            } else {
+                this.historyIndex = -1;
+            }
         }
 
-        // Устанавливаем значение в input
         if (this.historyIndex === -1) {
             this.commandInput.value = '';
         } else {
@@ -163,15 +247,16 @@ class ConsoleGame {
     processCommand(input) {
         if (!input) return;
 
-        // Добавляем команду в историю (если она не повторяет предыдущую)
-        if (this.commandHistory[this.commandHistory.length - 1] !== input) {
+        if (this.commandHistory.length === 0 || this.commandHistory[this.commandHistory.length - 1] !== input) {
             this.commandHistory.push(input);
+
+            if (this.commandHistory.length > 100) {
+                this.commandHistory.shift();
+            }
         }
 
-        // Сбрасываем индекс истории на "пустую строку"
         this.historyIndex = -1;
 
-        // Добавляем команду в историю вывода с правильным промптом
         const username = this.gameState.currentUser ? this.gameState.currentUser : 'user';
         this.print(`<span class="prompt">${username}@terminal:~$ </span> ${input}`);
 
@@ -468,12 +553,12 @@ P.S.
             const currentIndicator = index === this.historyIndex ?
                 '<span class="current-history"> ← текущая</span>' : '';
 
+            // Нумерация от 1 (самая старая) до N (самая новая)
             output += `<span class="history-number">${index + 1}.</span> ${command}${currentIndicator}<br>`;
         });
 
         output += `</div>`;
         output += `<div class="system-message">Всего команд: ${this.commandHistory.length}</div>`;
-        output += `<div class="system-message">Используйте стрелки вверх/вниз для навигации по истории</div>`;
 
         this.print(output, 'system');
     }
@@ -534,9 +619,10 @@ ${userInfo}
     }
 
     exit() {
-
-        this.print('Bye bye',"succsess", false);
-        this.interface.innerHTML = 'Bye bye';
+        this.print('Bye bye', "success", false);
+        setTimeout(() => {
+            this.interface.innerHTML = '<div style="color: #00ff00; text-align: center; margin-top: 50vh; transform: translateY(-50%); font-family: Courier New, monospace;">Терминал закрыт<br><br>Обновите страницу чтобы начать заново</div>';
+        }, 1000);
     }
 
     move(args) {
@@ -648,7 +734,7 @@ ${userInfo}
     createLine(message, type) {
         const line = document.createElement('div');
 
-        switch(type) {
+        switch (type) {
             case 'system':
                 line.className = 'system-message';
                 break;

@@ -9,28 +9,39 @@ body {
     font-family: 'Courier New', 'Consolas', monospace;
     color: #00ff00;
     height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+.container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
 }
 
-.container {
-    width: 100%;
-    max-width: 900px;
-    position: relative;
-}
-
-/* Терминал */
+/* Терминал с возможностью перетаскивания */
 .terminal {
     background: #1a1a1a;
     border: 2px solid #333;
     border-radius: 8px;
     box-shadow: 0 0 30px rgba(0, 255, 0, 0.1);
     overflow: hidden;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 600px;
+    max-width: 90vw;
+    min-height: 400px;
+    max-height: 90vh;
+    resize: none; /* Убрано изменение размера */
 }
 
-/* Шапка терминала */
+/* Заголовок терминала для перетаскивания */
 .terminal-header {
     background: #2d2d2d;
     padding: 10px 15px;
@@ -38,6 +49,12 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #333;
+    cursor: move;
+    user-select: none;
+}
+
+.terminal-header:active {
+    cursor: grabbing;
 }
 
 .header-buttons {
@@ -50,11 +67,30 @@ body {
     height: 12px;
     border-radius: 50%;
     display: inline-block;
+    transition: all 0.2s;
+    cursor: pointer;
 }
 
-.close-btn { background: #ff5f57; }
-.min-btn { background: #ffbd2e; }
-.max-btn { background: #28ca42; }
+.close-btn {
+    background: #ff5f57;
+}
+.close-btn:hover {
+    background: #ff3b30;
+}
+
+.min-btn {
+    background: #ffbd2e;
+}
+.min-btn:hover {
+    background: #ffa800;
+}
+
+.max-btn {
+    background: #28ca42;
+}
+.max-btn:hover {
+    background: #00b300;
+}
 
 .header-title {
     font-size: 14px;
@@ -64,7 +100,7 @@ body {
 
 /* Контент терминала */
 .terminal-content {
-    height: 500px;
+    height: 400px;
     padding: 20px;
     overflow-y: auto;
     line-height: 1.4;
@@ -166,6 +202,11 @@ body {
     gap: 10px;
     margin-top: 20px;
     justify-content: center;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
 }
 
 .control-row {
@@ -258,28 +299,6 @@ body {
     margin-left: 5px;
 }
 
-/* Анимации для посимвольного вывода */
-/* Улучшенные стили для анимированного текста */
-.typing-animation {
-    overflow: hidden;
-    white-space: nowrap;
-    border-right: 2px solid #00ff00;
-    animation: typing-cursor 0.8s infinite;
-}
-
-/* Для многострочного контента убираем nowrap */
-.typing-animation.multiline {
-    white-space: normal;
-    border-right: none;
-}
-
-.typing-animation.multiline::after {
-    content: '▊';
-    color: #00ff00;
-    animation: blink 0.8s infinite;
-    margin-left: 2px;
-}
-
 /* Стили для системы истории */
 .history-system {
     border-left: 3px solid #ffaa00;
@@ -300,24 +319,48 @@ body {
     font-style: italic;
     font-size: 12px;
     margin-left: 10px;
+    font-weight: bold;
 }
 
-.history-stats {
-    color: #66ccff;
-    font-size: 14px;
-    margin: 5px 0;
+/* Анимации для посимвольного вывода */
+.typing-animation {
+    overflow: hidden;
+    border-right: 2px solid #00ff00;
+    white-space: nowrap;
+    animation: typing-cursor 0.8s infinite;
 }
 
+@keyframes typing-cursor {
+    0%, 50% { border-color: #00ff00; }
+    51%, 100% { border-color: transparent; }
+}
+
+/* Индикатор перетаскивания */
+.dragging {
+    opacity: 0.9;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+}
 
 /* Адаптивность для мобильных */
 @media (max-width: 768px) {
     body {
         padding: 10px;
-        align-items: flex-start;
+    }
+
+    .terminal {
+        min-width: 95vw;
+        max-width: 95vw;
+        min-height: 70vh;
+        max-height: 80vh;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: 0 auto;
     }
 
     .terminal-content {
-        height: 400px;
+        height: 50vh;
         font-size: 14px;
         padding: 15px;
     }
@@ -347,7 +390,7 @@ body {
 
 @media (max-width: 480px) {
     .terminal-content {
-        height: 350px;
+        height: 45vh;
         font-size: 13px;
     }
 
@@ -362,5 +405,13 @@ body {
 
     .command-input {
         font-size: 13px;
+    }
+
+    .terminal-header {
+        padding: 8px 12px;
+    }
+
+    .header-title {
+        font-size: 12px;
     }
 }
