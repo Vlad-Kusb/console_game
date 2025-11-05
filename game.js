@@ -75,7 +75,7 @@ class ConsoleGame {
                     break;
 
                 case ' ': // Пробел
-                    if (e.ctrlKey || e.altKey) {
+                    if (e.ctrlKey || e.altKey || e.shiftKey) {
                         e.preventDefault();
                         this.processCommand('look');
                     }
@@ -345,10 +345,13 @@ class ConsoleGame {
     showHelp() {
         const userCommands = this.gameState.currentUser ? `
 <span class="command">whoami</span>    - Показать информацию о текущем пользователе
+<br>
 <span class="command">logout</span>    - Выйти из системы
+<br>
 <span class="command">showusers</span> - Показать всех пользователей
-` : `
+` : `<br>
 <span class="command">register [имя]</span> - Зарегистрировать нового пользователя
+<br>
 <span class="command">login [имя]</span>    - Войти под пользователем
 `;
 
